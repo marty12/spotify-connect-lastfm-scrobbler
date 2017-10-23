@@ -1,0 +1,26 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    scrobbler.handler.stream_handler:
+        class: ScrobblerBundle\Handler\StreamHandler
+        arguments:
+            ['%spotify_refresh_token%']
+        public: true
+
+    scrobbler.handler.scrobble_handler:
+        class: ScrobblerBundle\Handler\ScrobbleHandler
+        arguments:
+            ['%lastfm_api_key%', '%lastfm_session_id%', '%lastfm_api_secret%', '%lastfm_api_url%', '%lastfm_user_id%']
+        public: true
+
+    # external classes defined as services here for usability
+    spotify.web_api:
+        class: SpotifyWebAPI\SpotifyWebAPI
+
+    spotify.api_session:
+        class: SpotifyWebAPI\Session
+        arguments:
+            ['%spotify_client_id%', '%spotify_client_secret%', '%spotify_redirect_url%']

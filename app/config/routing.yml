@@ -1,0 +1,4 @@
+scrobbler:
+    resource: "@ScrobblerBundle/Controller/"
+    type:     annotation
+    prefix:   /
