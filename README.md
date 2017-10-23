@@ -13,7 +13,7 @@ composer install
 
 ## Usage
 
-NOTE: this application is still under heavy development and is far from stable. It is currently in the pre-alpha stage and as such probably will not work as expected, or not work at all. Don't say I didn't warn you!
+**NOTE: this application is still under heavy development and is far from stable. It is currently in the pre-alpha stage and as such probably will not work as expected, or not work at all. Don't say I didn't warn you!**
 
 To use this application, you need a Spotify API account and a Last.fm API account:
 
