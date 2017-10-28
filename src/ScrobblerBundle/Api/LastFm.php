@@ -6,6 +6,12 @@ use GuzzleHttp\Client;
 
 class LastFm
 {
+    const RESPONSE_TYPE_JSON = 'json';
+    const RESPONSE_TYPE_XML = 'xml';
+
+    const REQUEST_TYPE_GET = 'get';
+    const REQUEST_TYPE_POST = 'post';
+
     /** @var Client */
     private $httpClient;
 
@@ -24,6 +30,9 @@ class LastFm
     /** @var string */
     private $username;
 
+    /** @var string */
+    private $preferredResponseType;
+
     /**
      * LastFm constructor.
      * @param string $apiKey
@@ -41,6 +50,28 @@ class LastFm
         $this->apiSecret = $apiSecret;
         $this->apiUrl = $apiUrl;
         $this->username = $username;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPreferredResponseType(): string
+    {
+        if (! $this->preferredResponseType) {
+            $this->setPreferredResponseType(self::RESPONSE_TYPE_JSON);
+        }
+
+        return $this->preferredResponseType;
+    }
+
+    /**
+     * @param string $preferredResponseType
+     * @return LastFm
+     */
+    public function setPreferredResponseType(string $preferredResponseType): LastFm
+    {
+        $this->preferredResponseType = $preferredResponseType;
+        return $this;
     }
 
     /**
@@ -91,7 +122,7 @@ class LastFm
             'album' => $trackAlbum,
         );
 
-        $responseArray = $this->doPostRequest('track.updateNowPlaying', $queryParameters, true);
+        $responseArray = $this->doPostRequest('track.updateNowPlaying', $queryParameters);
 
         // debug stuff
         $artist = $responseArray['nowplaying']['artist']['#text'];
@@ -119,7 +150,7 @@ class LastFm
             'timestamp' => $timestamp
         );
 
-        $responseArray = $this->doPostRequest('track.scrobble', $queryParameters, true);
+        $responseArray = $this->doPostRequest('track.scrobble', $queryParameters);
 
         // debug stuff
         $artist = $responseArray['scrobbles']['scrobble']['artist']['#text'];
@@ -152,46 +183,42 @@ class LastFm
     /**
      * @param string $methodName
      * @param array $queryParameters
-     * @param bool $addSignature
      * @return array|null
      */
-    protected function doGetRequest($methodName, array $queryParameters, $addSignature = false): array // todo add nullable after PHP7.1 test
+    protected function doGetRequest($methodName, array $queryParameters): array // todo add nullable after PHP7.1 test
     {
-        $queryParameters['api_key'] = $this->apiKey;
-        $queryParameters['method'] = $methodName;
-
-        if ($addSignature) {
-            $queryParameters['api_sig'] = $this->getSignature($queryParameters);
-        }
-
-        $queryParameters['format'] = 'json';
-
-        $response = $this->getHttpClient()
-            ->get($this->apiUrl, ['query' => $queryParameters]);
-
-        return json_decode($response->getBody()->getContents(), true);
+        return $this->doRequest(self::REQUEST_TYPE_GET, $methodName, $queryParameters);
     }
 
     /**
      * @param string $methodName
      * @param array $queryParameters
-     * @param bool $addSignature
      * @return array|null
      */
-    protected function doPostRequest($methodName, array $queryParameters, $addSignature = false): array // todo add nullable after PHP7.1 test
+    protected function doPostRequest($methodName, array $queryParameters): array // todo add nullable after PHP7.1 test
     {
+        $queryParameters['sk'] = $this->sessionId;
+        return $this->doRequest(self::REQUEST_TYPE_POST, $methodName, $queryParameters, true);
+    }
+
+    protected function doRequest($requestType, $methodName, $queryParameters, $addSignature = false)
+    {
+        if ($requestType != self::REQUEST_TYPE_GET && $requestType != self::REQUEST_TYPE_POST) {
+            throw new \Exception(sprintf('cannot execute request of type %s', $requestType));
+        }
+
         $queryParameters['api_key'] = $this->apiKey;
         $queryParameters['method'] = $methodName;
-        $queryParameters['sk'] = $this->sessionId;
 
         if ($addSignature) {
             $queryParameters['api_sig'] = $this->getSignature($queryParameters);
         }
 
-        $queryParameters['format'] = 'json';
+        $queryParameters['format'] = $this->getPreferredResponseType();
+        $guzzleOptionsKey = ($requestType == 'get') ? 'query' : 'form_params';
 
         $response = $this->getHttpClient()
-            ->post($this->apiUrl, ['form_params' => $queryParameters]);
+            ->$requestType($this->apiUrl, [$guzzleOptionsKey => $queryParameters]);
 
         return json_decode($response->getBody()->getContents(), true);
     }
