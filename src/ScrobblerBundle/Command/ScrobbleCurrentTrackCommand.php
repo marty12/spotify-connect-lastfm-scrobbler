@@ -11,8 +11,6 @@ use Symfony\Component\Filesystem\Filesystem;
 
 class ScrobbleCurrentTrackCommand extends ContainerAwareCommand
 {
-    const PROGRESS_FOR_SCROBBLE = 0.75;
-
     protected function configure()
     {
         $this->setName('scrobble:current-track')
@@ -41,9 +39,8 @@ class ScrobbleCurrentTrackCommand extends ContainerAwareCommand
             $this->getContainer()->get('scrobbler.handler.scrobble_handler')
                 ->updateCurrentlyPlaying($currentTrackData);
 
-            if ($this->getContainer()->get('scrobbler.handler.scrobble_handler')->trackShouldBeScrobbled($currentTrackData)) {
-                $this->getContainer()->get('scrobbler.handler.scrobble_handler')->scrobbleTrack($currentTrackData);
-            }
+            $this->getContainer()->get('scrobbler.handler.scrobble_handler')
+                ->handleTrackScrobbling($currentTrackData);
         } catch (\Exception $e) {
             echo $e->getMessage() . "\n";
             // todo add more error handling
