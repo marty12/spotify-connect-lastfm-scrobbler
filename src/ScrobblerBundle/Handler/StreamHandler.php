@@ -63,20 +63,17 @@ class StreamHandler
         $this->spotifyWebApiSession = $spotifyWebApiSession;
     }
 
+    public function shouldExecute()
+    {
+        $currentPlaybackData = $this->executeSpotifyRequest('getMyCurrentPlaybackInfo');
+
+        // todo add more playback types
+        return $currentPlaybackData['device']['type'] === 'CastVideo';
+    }
+
     public function getCurrentlyPlayingSpotifyTrack()
     {
-        try {
-            $spotifyCurrentTrackData = $this->getSpotifyWebApi()->getMyCurrentTrack();
-        } catch (\Exception $e) {
-            if ($e->getCode() == 401) {
-                $this->refreshSpotifyAccessToken();
-                echo "refreshed spotify access token \n"; //todo remove debug line
-            }
-
-            // todo should point to itself, but better error handling is required to prevent an infinite loop
-            $spotifyCurrentTrackData = $this->getSpotifyWebApi()->getMyCurrentTrack();
-        }
-
+        $spotifyCurrentTrackData = $this->executeSpotifyRequest('getMyCurrentTrack');
         if (! isset($spotifyCurrentTrackData['item'])) {
             return false;
         }
@@ -89,6 +86,23 @@ class StreamHandler
             'track_title'  => $spotifyCurrentTrackData['item']['name'],
             'track_album'  => $spotifyCurrentTrackData['item']['album']['name']
         );
+    }
+
+    protected function executeSpotifyRequest($methodName)
+    {
+        try {
+            $data = $this->getSpotifyWebApi()->$methodName();
+        } catch (\Exception $e) {
+            if ($e->getCode() == 401) {
+                $this->refreshSpotifyAccessToken();
+                echo "refreshed spotify access token \n"; //todo remove debug line
+            }
+
+            // todo should point to itself, but better error handling is required to prevent an infinite loop
+            $data = $this->getSpotifyWebApi()->$methodName();
+        }
+
+        return $data;
     }
 
     protected function refreshSpotifyAccessToken()
