@@ -18,7 +18,7 @@ class ScrobbleCurrentTrackCommand extends ContainerAwareCommand
     {
         while (true) {
             $this->runProcess();
-            sleep(1);
+            sleep(10);
         }
     }
 
