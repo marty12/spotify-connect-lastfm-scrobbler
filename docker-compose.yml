@@ -1,0 +1,36 @@
+version: '3'
+# note: network mode set to bridge to prevent the use of separate subnets
+services:
+    php:
+        build: docker/build/php/
+        environment:
+            - ENVIRONMENT=PROD
+        volumes:
+            - .:/var/www/html
+        depends_on:
+            - mariadb
+        links:
+            - mariadb
+        network_mode: bridge
+    nginx:
+        build: docker/build/nginx/
+        volumes:
+            - .:/var/www/html
+        depends_on:
+            - php
+        links:
+            - php
+        ports:
+            - 80:80
+        network_mode: bridge
+    mariadb:
+        container_name: scrobbler-mariadb
+        image: mariadb
+        ports:
+            - 33066:3306
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: scrobbler
+        volumes:
+            - ./docker/data/mariadb/:/var/lib/mysql:rw
+        network_mode: bridge
