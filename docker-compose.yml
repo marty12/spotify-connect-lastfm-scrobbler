@@ -12,6 +12,7 @@ services:
         links:
             - mariadb
         network_mode: bridge
+        user: www-data
     nginx:
         build: docker/build/nginx/
         volumes:
