@@ -163,7 +163,9 @@ class ScrobbleHandler
 
         if (! $configuration) {
             $configuration = new Configuration();
+            $configuration->setId(1);
             $this->getEntityManager()->persist($configuration);
+            $this->getEntityManager()->flush();
         }
 
         return $configuration;
