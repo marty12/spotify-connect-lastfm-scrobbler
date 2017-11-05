@@ -15,8 +15,6 @@ RUN chmod a+x /usr/local/bin/phpunit
 
 ADD application.ini /usr/local/etc/php/conf.d/application.ini
 
-ENTRYPOINT sh /var/www/html/docker/build/php/entrypoint.sh && php-fpm
-
 ADD .bashrc /var/www/.bashrc
 
 RUN usermod -s /bin/bash www-data
