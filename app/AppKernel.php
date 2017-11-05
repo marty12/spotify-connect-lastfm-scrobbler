@@ -29,6 +29,14 @@ class AppKernel extends Kernel
             }
         }
 
+        // Sonata Admin related bundles
+        $bundles[] = new Sonata\CoreBundle\SonataCoreBundle();
+        $bundles[] = new Sonata\BlockBundle\SonataBlockBundle();
+        $bundles[] = new Knp\Bundle\MenuBundle\KnpMenuBundle();
+
+        // Storage and SonataAdminBundle
+        $bundles[] = new Sonata\AdminBundle\SonataAdminBundle();
+
         return $bundles;
     }
 
