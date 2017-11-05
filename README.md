@@ -11,6 +11,12 @@ Use composer to install the necessary dependencies
 composer install
 ```
 
+After that, create the database and tables:
+
+```bash
+bin/console doctrine:database:create
+bin/console doctrine:schema:update --force
+``` 
 ## Usage
 
 **NOTE: this application is currently in alpha phase and may not always work as expected.**
@@ -33,4 +39,15 @@ Copy the session id to parameters.yml. After this, you should be ready to go! Ru
 
 ``` bash
 php bin/console scrobble:current-track
+```
+
+## Docker Environment
+A docker environment has been provided to ease the use of the application. To use this, simply install docker and docker-compose and run:
+``` bash
+docker-compose build && docker-compose up -d
+```
+
+The php container is quite a 'fat' container, with additions to make development easier. To start scrobbling using the default docker setup, go to the root folder of the project and run:
+``` bash
+docker-compose exec php /var/www/html/bin/console scrobble:current-track --env=prod
 ```
