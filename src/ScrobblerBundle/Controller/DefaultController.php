@@ -5,7 +5,9 @@ namespace ScrobblerBundle\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use SpotifyWebAPI;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Class DefaultController
@@ -29,10 +31,11 @@ class DefaultController extends Controller
             'scope' => [
                 'user-read-currently-playing',
                 'user-read-recently-played',
+                'user-read-playback-state'
             ],
         ];
 
-        header('Location: ' . $session->getAuthorizeUrl($options));
+        return new RedirectResponse($session->getAuthorizeUrl($options));
     }
 
     /**
@@ -53,7 +56,6 @@ class DefaultController extends Controller
         $accessToken = $session->getAccessToken();
         $refreshToken = $session->getRefreshToken();
 
-        echo "access token $accessToken <br />";
-        echo "refresh token $refreshToken <br />";
+        return new Response(sprintf('access token %s <br />refresh token %s<br />', $accessToken, $refreshToken));
     }
 }
