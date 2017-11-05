@@ -2,12 +2,9 @@
 
 namespace ScrobblerBundle\Command;
 
-use GuzzleHttp\Client;
-use SpotifyWebAPI;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Filesystem\Filesystem;
 
 class ScrobbleCurrentTrackCommand extends ContainerAwareCommand
 {
@@ -28,6 +25,10 @@ class ScrobbleCurrentTrackCommand extends ContainerAwareCommand
     protected function runProcess()
     {
         try {
+            if (! $this->getContainer()->get('scrobbler.handler.stream_handler')->shouldExecute()) {
+                return;
+            }
+
             $currentTrackData = $this->getContainer()
                 ->get('scrobbler.handler.stream_handler')
                 ->getCurrentlyPlayingSpotifyTrack();
